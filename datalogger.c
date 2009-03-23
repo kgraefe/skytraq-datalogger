@@ -21,38 +21,21 @@
  */
 #include "datalogger.h"
 #include "lowlevel.h"
-#include "agps-download.h"
 
-#define SKYTRAQ_COMMAND_SYSTEM_RESTART           0x01
-#define SKYTRAQ_COMMAND_QUERY_SOFTWARE_VERSION   0x02
-#define SKYTRAQ_COMMAND_QUERY_SOFTWARE_CRC       0x03
-#define SKYTRAQ_COMMAND_SET_FACTORY_DEFAULTS     0x04
-#define SKYTRAQ_COMMAND_CONFIGURE_SERIAL_PORT    0x05
-#define SKYTRAQ_COMMAND_CONFIGURE_NMEA_MESSAGE   0x08
-#define SKYTRAQ_COMMAND_CONFIGURE_MESSAGE_TYPE   0x09
+#define SKYTRAQ_COMMAND_GET_SOFTWARE_VERSION        2
+#define SKYTRAQ_COMMAND_CONFIGURE_SERIAL_PORT       5
 #define SKYTRAQ_COMMAND_GET_CONFIG               0x17
 #define SKYTRAQ_COMMAND_WRITE_CONFIG             0x18
 #define SKYTRAQ_COMMAND_ERASE                    0x19
 #define SKYTRAQ_COMMAND_READ_SECTOR              0x1b
-#define SKYTRAQ_COMMAND_GET_EPHERMERIS           0x30
-#define SKYTRAQ_COMMAND_SET_EPHEMERIS            0x31
 #define SKYTRAQ_COMMAND_READ_AGPS_STATUS         0x34
-#define SKYTRAQ_COMMAND_SEND_AGPS_DATA           0x35
-#define SKYTRAQ_RESPONSE_SOFTWARE_VERSION        0x80
-#define SKYTRAQ_RESPONSE_SOFTWARE_CRC            0x81
-#define SKYTRAQ_RESPONSE_ACK                     0x83
-#define SKYTRAQ_RESPONSE_NACK                    0x84
-#define SKYTRAQ_RESPONSE_EPHEMERIS_DATA          0xb1
 
-#define TIMEOUT  1000l
-
-int skytraq_read_software_version( int fd) {
-    int result = ERROR;
+void skytraq_read_software_version( int fd) {
     SkyTraqPackage* request = skytraq_new_package(2);
-    request->data[0] = SKYTRAQ_COMMAND_QUERY_SOFTWARE_VERSION;
+    request->data[0] = SKYTRAQ_COMMAND_GET_SOFTWARE_VERSION;
     request->data[1] = 1;
-    if ( ACK == skytraq_write_package_with_response(fd,request,TIMEOUT)) {
-        SkyTraqPackage* response = skytraq_read_next_package(fd,TIMEOUT);
+    if ( ACK == skytraq_write_package_with_response(fd,request)) {
+        SkyTraqPackage* response = skytraq_read_next_package(fd);
         if ( response != NULL) {
             skytraq_dump_package(response);
 
@@ -61,13 +44,10 @@ int skytraq_read_software_version( int fd) {
                    response->data[7],response->data[8],response->data[9],
                    response->data[11],response->data[12],response->data[13]);
             skytraq_free_package(response);
-            result = SUCCESS;
         }
     }
 
     skytraq_free_package(request);
-
-    return result;
 }
 
 void skytraq_write_datalogger_config( int fd, skytraq_config* config) {
@@ -99,7 +79,7 @@ void skytraq_write_datalogger_config( int fd, skytraq_config* config) {
     request->data[24] = config->min_speed & 0xff;
     request->data[25] = config->datalog_enable;
     request->data[26] = config->log_fifo_mode;
-    skytraq_write_package_with_response(fd,request,TIMEOUT);
+    skytraq_write_package_with_response(fd,request);
     skytraq_free_package(request);
 }
 
@@ -109,15 +89,14 @@ unsigned uint32_from_buffer( gbuint8* buffer, int offset ) {
 }
 
 unsigned uint16_from_buffer( gbuint8* buffer, int offset ) {
-    return buffer[offset]| (buffer[offset+1]<<8);
+return buffer[offset]| (buffer[offset+1]<<8);
 }
 
-int skytraq_read_datalogger_config( int fd, skytraq_config* config ) {
-    int result = ERROR;
+void skytraq_read_datalogger_config( int fd, skytraq_config* config ) {
     SkyTraqPackage* request = skytraq_new_package(1);
     request->data[0] = SKYTRAQ_COMMAND_GET_CONFIG;
-    if ( ACK == skytraq_write_package_with_response(fd,request,TIMEOUT)) {
-        SkyTraqPackage* response = skytraq_read_next_package(fd,TIMEOUT);
+    if ( ACK == skytraq_write_package_with_response(fd,request)) {
+        SkyTraqPackage* response = skytraq_read_next_package(fd);
         if ( response != NULL) {
             skytraq_dump_package(response);
 
@@ -134,18 +113,16 @@ int skytraq_read_datalogger_config( int fd, skytraq_config* config ) {
             config->log_fifo_mode = response->data[34];
 
             skytraq_free_package(response);
-            result = SUCCESS;
         }
     }
 
     skytraq_free_package(request);
-    return result;
 }
 
 void skytraq_clear_datalog( int fd) {
     SkyTraqPackage* request= skytraq_new_package(1);
     request->data[0] = 0x19;
-    skytraq_write_package_with_response(fd,request,TIMEOUT);
+    skytraq_write_package_with_response(fd,request);
     skytraq_free_package(request);
 }
 
@@ -157,7 +134,7 @@ int skytraq_read_datalog_sector( int fd, gbuint8 sector, gbuint8* buffer ) {
         SkyTraqPackage* request= skytraq_new_package(2);;
         request->data[0] = 0x1b;
         request->data[1] = sector;
-        if ( ACK == skytraq_write_package_with_response(fd,request,TIMEOUT)) {
+        if ( ACK == skytraq_write_package_with_response(fd,request)) {
             int i,len, count = 0;
             gbuint8 c, lastByte1, lastByte2,cs,checksum;
 
@@ -242,7 +219,7 @@ int skytraq_set_serial_speed( int fd, int speed, int permanent) {
     request->data[1] = 0;
     request->data[2] = speed;
     request->data[3] = permanent & 1;
-    if ( ACK != skytraq_write_package_with_response(fd, request,TIMEOUT) ) {
+    if ( ACK != skytraq_write_package_with_response(fd, request) ) {
         fprintf( stderr, "setting line speed FAILED\n");
         return 1;
     }
@@ -252,7 +229,7 @@ int skytraq_set_serial_speed( int fd, int speed, int permanent) {
 
 
 /*unsigned baud_rates[] = { 115200, 9600,57600 ,1200,2400,4800,19200, 38400 };*/
-unsigned baud_rates[] = { 9600,115200, 57600, 38400, 19200, 9600, 4800, 2400, 1200 };
+unsigned baud_rates[] = { 115200, 57600, 38400, 19200, 9600, 4800, 2400, 1200 };
 
 int contains( gbuint8* haystack, int h_length, gbuint8* needle, int n_length) {
     int offset = 0;
@@ -274,8 +251,6 @@ int contains( gbuint8* haystack, int h_length, gbuint8* needle, int n_length) {
     return 0;
 }
 
-
-
 int skytraq_determine_speed( int fd) {
     gbuint8 request[] = { 0xA0, 0xA1, 0x00, 0x02, 0x02, 0x01, 0x03, 0x0D, 0x0A };
     gbuint8 expected_response[] = { 0xA0, 0xA1, 0x00, 0x02, 0x83, 0x02, 0x81, 0x0D, 0x0A};
@@ -292,35 +267,32 @@ int skytraq_determine_speed( int fd) {
          * otherwise at least we will let device enough characters
          * to respond to previous requests */
         len = read_with_timeout(fd, buffer, buf_size,200);
-
-#ifdef DEBUG_ALL
-DEBUG("len=%d\n",len);
-        if (len < (buf_size-1))
-            buffer[len]=0; /* in C strings must be terminated by 0 */
-        else
-            buffer[buf_size-1]=0; /* we truncate one symbol from the buffer */
-        DEBUG("current ascii output: \n");
-        DEBUG("received %d bytes\n", len);
-        DEBUG("buffer as ascii contains: %s\n", buffer);
-#endif
         if ( contains( buffer, len, expected_nmea_responce, 3)) {
             nmea_detection_succeded=1;
             DEBUG("NMEA detection succeeded\n");
             DEBUG("detected speed is %d\n", baud_rates[i]);
         } else {
             /* try binary detection */
+#ifdef DEBUG_ALL
+            if (len < (buf_size-1))
+                buffer[len]=0; /* in C strings must be terminated by 0 */
+            else
+                buffer[buf_size-1]=0; /* we truncate one simbol from the buffer */
+            DEBUG("current ascii output:\n");
+            DEBUG("received %d bytes\n", len);
+            DEBUG("buffer as ascii contains: %s\n", buffer);
+#endif
 
             /* send "QUERY SOFTWARE VERSION" command to GPS unit */
             write(fd, request, 9);
 
             len = read_with_timeout(fd, buffer, buf_size,200);
 #ifdef DEBUG_ALL
-DEBUG("len=%d\n",len);
             if (len < (buf_size-1))
                 buffer[len]=0; /* in C strings must be terminated by 0 */
             else
-                buffer[buf_size-1]=0; /* we truncate one symbol from the buffer */
-            DEBUG("after binary request output: \n");
+                buffer[buf_size-1]=0; /* we truncate one simbol from the buffer */
+            DEBUG("after binary request outtput:\n");
             DEBUG("received %d bytes\n", len);
             DEBUG("buffer as ascii contains: %s\n", buffer);
 #endif
@@ -361,144 +333,21 @@ void skytraq_read_agps_status(int fd, skytraq_config* config)  {
     request->data[2] = (date->tm_year + 1900)&0xff;
     request->data[3] = date->tm_mon + 1;
     request->data[4] = date->tm_mday ;
-    request->data[5] = date->tm_hour;
+    request->data[5] = date->tm_hour; 
     request->data[6] = date->tm_min;
     request->data[7] = date->tm_sec;
-
-    if ( ACK == skytraq_write_package_with_response(fd,request,TIMEOUT)) {
-        SkyTraqPackage* response = skytraq_read_next_package(fd,TIMEOUT);
+        
+    if ( ACK == skytraq_write_package_with_response(fd,request)) {
+        SkyTraqPackage* response = skytraq_read_next_package(fd);
         if ( response != NULL) {
             skytraq_dump_package(response);
 
             config->agps_hours_left = uint16_from_buffer(response->data,1);
-            config->agps_enabled    = response->data[3];
+	    config->agps_enabled    = response->data[3];
 
             skytraq_free_package(response);
         }
     }
 
     skytraq_free_package(request);
-}
-
-int skytraq_output_disable( int fd ) {
-    int success;
-    SkyTraqPackage* request = skytraq_new_package(3);
-    request->data[0] = SKYTRAQ_COMMAND_CONFIGURE_MESSAGE_TYPE;
-    request->data[1] = 0;
-    request->data[2] = 0;  /* 1 = permanent */
-
-    success = skytraq_write_package_with_response(fd,request,TIMEOUT);
-    skytraq_free_package(request);
-    return success;
-}
-
-int skytraq_output_enable_nmea( int fd ) {
-    int success;
-    SkyTraqPackage* request = skytraq_new_package(3);
-    request->data[0] = SKYTRAQ_COMMAND_CONFIGURE_MESSAGE_TYPE;
-    request->data[1] = 1;
-    request->data[2] = 0;  /* 1 = permanent */
-
-    success = skytraq_write_package_with_response(fd,request,TIMEOUT);
-    skytraq_free_package(request);
-    return success;
-}
-
-int skytraq_output_enable_binary( int fd ) {
-    int success;
-    SkyTraqPackage* request = skytraq_new_package(3);
-    request->data[0] = SKYTRAQ_COMMAND_CONFIGURE_MESSAGE_TYPE;
-    request->data[1] = 2;
-    request->data[2] = 0;  /* 1 = permanent */
-
-    success = skytraq_write_package_with_response(fd,request,TIMEOUT);
-    skytraq_free_package(request);
-    return success;
-}
-
-int skytraq_read_ok( int fd ) {
-   gbuint8 buf[50];
-   int len;
-   
-   len = read_string(fd, (gbuint8*)&buf, 50, TIMEOUT );
-   
-   if( len > 0 ) {
-      printf("response from GPS device: %s\n", buf);
-      return strncmp( "OK", (char*)&buf, 50) == 0;
-   }
-   
-   return 0;
-}
-
-/**
-  *  Send block of bytes and wait for OK\0
-  */
-int skytraq_send_agps_data_block( int fd, gbuint8* data, unsigned block_size ) {
-   int i;
-   
-   printf("sending %d bytes from position %p\n", block_size, data);
-   
-   for( i= 0; i< 16; i++) {
-      printf("%02x ", data[i]);
-   }
-   printf(" ... \n");
-   
-   int len = write_buffer(fd, data, block_size);
-
-   for( i= block_size-16; i< block_size; i++) {
-      printf("%02x ", data[i]);
-   }
-   printf("\n");
-   
-   
-   printf("%d bytes written\n", len);
-
-   return skytraq_read_ok( fd );
-}
-
-
-int skytraq_send_agps_data( int fd, agps_data* data  ) {
-    gbuint8 info_string[100];
-    char buf[4];
-    int len;
-    unsigned offset  = 0;
-    unsigned data_left = data->size;
-   
-    SkyTraqPackage* request = skytraq_new_package(1);
-    request->data[0] = SKYTRAQ_COMMAND_SEND_AGPS_DATA;
-    skytraq_write_package_with_response(fd,request,TIMEOUT);
-    skytraq_free_package(request);
-
-printf("got ACK\n");
-
-    /* start the transmission */    
-    len = snprintf( (char*)info_string, 100, "BINSIZE = %d Checksum = %d Checksumb = %d ", data->size, data->checksumA, data->checksumB );
-    info_string[len] = 0;
-    printf("%s\n", info_string);
-    
-    write_buffer(fd, info_string, len+1);
-    
-printf("waiting for OK\n");    
-    if( ! skytraq_read_ok( fd ) ) {
-       return ERROR;
-    }
-
-    while( data_left >= 0x1000 ) {
-       printf("data left: %d\n", data_left);
-       if( !skytraq_send_agps_data_block(fd, data->memory + offset , 0x1000) ) {
-         return ERROR;
-       }
-       
-       
-       data_left -= 0x1000;
-       offset += 0x1000;
-    }
-    
-    /* send last block */
-    printf("sending last %d bytes\n", data_left);
-    skytraq_send_agps_data_block(fd, data->memory + offset , data_left);
-    
-    read_with_timeout( fd, &buf, 4, TIMEOUT);
-        
-    return buf[0] == 'E' && buf[1] == 'N' && buf[2] == 'D'&& buf[3] == 0;
 }

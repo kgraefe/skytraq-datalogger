@@ -21,7 +21,6 @@
  */
  
 #include "datalogger.h"
-#include <time.h>
 
 
 void ecef_to_geo( double X, double Y, double Z, double* longitude, double* latitude, double* height) {
@@ -63,28 +62,6 @@ unsigned long gsp_time_to_timestamp( int wno, int tow) {
     return 604800 * wno + 315964800 + tow;
 }
 
-void timestamp_to_iso8601str(char *time_string, time_t timestamp) {
-    struct tm *tm = gmtime(&timestamp);
-    char *format;
-    int n;
-    /* sample of iso8601 time in UTC: 2008-10-16T14:55:29Z */
-    format = "%02d-%02d-%02dT%02d:%02d:%02d";
-    n = sprintf(time_string, format,
-            tm->tm_year+1900,
-	    tm->tm_mon+1,
-	    tm->tm_mday,
-	    tm->tm_hour,
-	    tm->tm_min,
-	    tm->tm_sec);
-    time_string[n++] = 'Z';
-}
-
-void output_gpx_trk_point( long timestamp, double latitude, double longitude, double height, int speed) {
-    char iso8601str[] = "2008-10-16T14:55:29Z";
-    timestamp_to_iso8601str(iso8601str, timestamp);
-    printf(" <trkpt lat=\"%f\" lon=\"%f\"> <time>%s</time> <ele>%f</ele> <speed>%d</speed> </trkpt>\n", latitude, longitude, iso8601str, height, speed);
-}
-
 void decode_long_entry( gbuint8* d, long* time, int* ecef_x, int* ecef_y, int* ecef_z, int* speed) {
     int wno, tow;
 
@@ -123,7 +100,7 @@ void decode_short_entry( gbuint8* d, long* time, int* ecef_x, int* ecef_y, int* 
     *ecef_z = *ecef_z + dz;
 }
 
-void process_buffer(gbuint8* buffer, int length, int gpx_format) {
+void process_buffer(gbuint8* buffer, int length) {
     int offset = 0;
     long time;
     int ecef_x,  ecef_y, ecef_z,  speed;
@@ -136,21 +113,13 @@ void process_buffer(gbuint8* buffer, int length, int gpx_format) {
             /* long entry */
             decode_long_entry(buffer+offset,  &time, &ecef_x,&ecef_y, &ecef_z, &speed);
 	    ecef_to_geo(ecef_x, ecef_y,ecef_z ,&longitude, &latitude, &height);
-	    if (!gpx_format) {
-	        printf("%ld\t%d\t%f\t%f\t%f\n", time,speed,  longitude, latitude, height );
-	    } else {
-	        output_gpx_trk_point( time, latitude, longitude, height, speed);
-	    }
+	    printf("%ld\t%d\t%f\t%f\t%f\n", time,speed,  longitude, latitude, height );
             offset += 18;
         } else if (  buffer[offset] == 0x80 ) {
             /* short entry */
             decode_short_entry(buffer+offset,  &time, &ecef_x,&ecef_y, &ecef_z, &speed);
 	    ecef_to_geo(ecef_x, ecef_y,ecef_z ,&longitude, &latitude, &height);
-	    if (!gpx_format) {
-		printf("%ld\t%d\t%f\t%f\t%f\n", time,speed,  longitude, latitude, height );
-	    } else {
-	        output_gpx_trk_point( time, latitude, longitude, height, speed);
-	    }
+	    printf("%ld\t%d\t%f\t%f\t%f\n", time,speed,  longitude, latitude, height );
             offset += 8;
         } else {
             /* search for valid entry */

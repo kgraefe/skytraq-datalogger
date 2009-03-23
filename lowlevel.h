@@ -20,23 +20,11 @@
 
  */
 
-#ifndef lowlevel_h
-#define lowlevel_h
-
 void skytraq_dump_package( SkyTraqPackage* p ) ;
 void skytraq_free_package( SkyTraqPackage* p );
 SkyTraqPackage* skytraq_new_package( int length );
-SkyTraqPackage* skytraq_read_next_package( int fd, unsigned timeout );
-int skytraq_write_package_with_response( int fd, SkyTraqPackage* p, unsigned timeout );
+SkyTraqPackage* skytraq_read_next_package( int fd );
+int skytraq_write_package_with_response( int fd, SkyTraqPackage* p );
 int open_port( char* device);
 int set_port_speed( int fd, unsigned speed);
 int read_with_timeout( int fd, void* buffer, unsigned len, unsigned timeout);
-
-int write_buffer(int fd, gbuint8* buf, int len);
-
-/**
-  * Read a zero-terminated string from the GPS device.
-  */
-int read_string( int fd, gbuint8* buffer, int max_length, unsigned timeout );
-
-#endif

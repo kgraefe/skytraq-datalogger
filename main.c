@@ -24,17 +24,16 @@
 #include "lowlevel.h"
 
 enum{ NO_ACTION, ACTION_INFO, ACTION_DELETE, ACTION_DUMP, ACTION_CONFIG,
-      ACTION_SET_SPEED, ACTION_OUTPUT_OFF, ACTION_OUTPUT_NMEA, ACTION_OUTPUT_BINARY
+      ACTION_SET_SPEED
     };
 
 #define verbose(fmt, args...) fprintf(stderr, fmt"\n", ##args)
 
 int main(int argc, char *argv[])  {
-    int fd, i, baud_rate = 0, action=NO_ACTION, serial_speed=0;
-    int min_time=-1, max_time=-1, min_dist=-1, max_dist=-1, min_speed=-1, max_speed=-1, enable=0, disable=0, gpx_format=0;
+    int fd, i, speed, action=NO_ACTION, serial_speed=0;
+    int min_time=-1, max_time=-1, min_dist=-1, max_dist=-1, min_speed=-1, max_speed=-1, enable=0, disable=0;
     int mode_fifo = 0, mode_stop = 0;
     int permanent = 0;
-    int success;
     char* device = "/dev/ttyUSB0";
 
     for ( i = 1; i < argc; i++ ) {
@@ -71,38 +70,22 @@ int main(int argc, char *argv[])  {
             mode_fifo = 1;
         } else if ( !strcmp(argv[i], "--mode-stop" ) ) {
             mode_stop = 1;
-        } else if ( !strcmp(argv[i], "--gpx" ) ) {
-            gpx_format = 1;
         } else if ( !strcmp(argv[i], "--permanent" ) ) {
             permanent = 1;
-        } else if ( !strcmp(argv[i], "--set-output-off" ) ) {
-            action = ACTION_OUTPUT_OFF;
-        } else if ( !strcmp(argv[i], "--set-output-nmea" ) ) {
-            action = ACTION_OUTPUT_NMEA;
-        } else if ( !strcmp(argv[i], "--set-output-bin" ) ) {
-            action = ACTION_OUTPUT_BINARY;
-        } else if ( !strcmp(argv[i], "--baud-rate" ) ) {
-	    if ( argc>i+1) baud_rate = atoi(argv[++i]);
-	}
+        }
     }
 
     if ( action == NO_ACTION ) {
         fprintf(stderr, "USAGE: %s <OPTIONS> ACTION \n", argv[0]);
         fprintf(stderr, " ACTION is one of:\n");
-        fprintf(stderr, "  --info             get information about software version and configuration\n");
-        fprintf(stderr, "  --delete           delete all track lists from the data logger\n");
-        fprintf(stderr, "  --dump             dump track lists to STDOUT\n");
-        fprintf(stderr, "  --set-config       change configuration of the data logger\n");
-        fprintf(stderr, "  --set-baud-rate    configure speed of the device's serial port\n");
-        fprintf(stderr, "  --set-output-off   disable output for GPS data\n");
-        fprintf(stderr, "  --set-output-nmea  enable output for GPS data in NMEA format\n");
-        fprintf(stderr, "  --set-output-bin   enable output for GPS data in binary format\n");
+        fprintf(stderr, "  --info           get information about software version and configuration\n");
+        fprintf(stderr, "  --delete         delete all track lists from the data logger\n");
+        fprintf(stderr, "  --dump           dump track lists to STDOUT\n");
+        fprintf(stderr, "  --set-config     change configuration of the data logger\n");
+        fprintf(stderr, "  --set-baud-rate  configure speed of the device's serial	port\n");
         fprintf(stderr, " OPTIONS:\n");
         fprintf(stderr, "  --device <DEV>        name of the device, default is /dev/ttyUSB0\n");
         fprintf(stderr, "  --permanent           write serial port speed to FLASH\n");
-	fprintf(stderr, "  --baud-rate           set baud-rate manually\n");
-        fprintf(stderr, " OPTIONS for dump output:\n");
-        fprintf(stderr, "  --gpx                 dump track in gpx format\n");
         fprintf(stderr, " OPTIONS for configuration:\n");
         fprintf(stderr, "  --time <SECONDS>      log every <SECONDS> seconds\n");
         fprintf(stderr, "  --max-time <SECONDS>  \n");
@@ -124,22 +107,17 @@ int main(int argc, char *argv[])  {
     }
 
     /* detect device and speed */
-    if( baud_rate == 0 ) {
-	    baud_rate = skytraq_determine_speed(fd);
-	    if ( baud_rate == 0 ) {
-	        fprintf(stderr,"Could not find data logger at port %s\n", device);
-	        return 1;
-	    }
+    speed = skytraq_determine_speed(fd);
+    if ( speed == 0 ) {
+        fprintf(stderr,"Could not find data logger at port %s\n", device);
+        return 1;
     }
+
+
 
     /* get status and config from GPS data logger */
     skytraq_config* info = malloc( sizeof(skytraq_config));
-    success = skytraq_read_datalogger_config(fd,info);
-    
-    if( success != SUCCESS ) {
-    	fprintf(stderr, "No response from datalogger.\n");
-	return 1;
-    }
+    skytraq_read_datalogger_config(fd,info);
 
     if ( action == ACTION_INFO ) {
         int agps_days, agps_hours;
@@ -173,7 +151,7 @@ int main(int argc, char *argv[])  {
 	  printf("%d hours ", agps_hours);
 	}
 	printf("\n");
-	printf("baud-rate:       %d bps\n", baud_rate);
+	printf("baud-rate:       %d bps\n", speed);
     } else if ( action == ACTION_DELETE ) {
         skytraq_clear_datalog(fd);
     } else if ( action == ACTION_DUMP ) {
@@ -181,9 +159,6 @@ int main(int argc, char *argv[])  {
 
         used_sectors = info->total_sectors - info->sectors_left + 1;
 
-	if (gpx_format) {
-	    printf("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<gpx>\n<trk>\n<trkseg>\n");
-	}
         for ( i = 0; i< used_sectors ; i++ ) {
             int len, retries_left = 3;
             gbuint8* buf = malloc(4100);
@@ -193,16 +168,13 @@ int main(int argc, char *argv[])  {
                 len= skytraq_read_datalog_sector(fd,i,buf);
                 retries_left--;
             }
-            process_buffer(buf,len,gpx_format);
+            process_buffer(buf,len);
             free(buf);
 
             sleep(1);
             /* close(fd);
              fd = open("/dev/ttyUSB0",O_RDWR); */
         }
-	if (gpx_format) {
-	    printf("</trkseg>\n</trk>\n</gpx>\n");
-	}
     } else if ( action  == ACTION_CONFIG ) {
         if ( min_time > -1 ) info->min_time = min_time;
         if ( max_time > -1 ) info->max_time = max_time;
@@ -223,12 +195,6 @@ int main(int argc, char *argv[])  {
 	   fprintf( stderr, "unknown speed %d\n", serial_speed);
 	   return 1;
 	}
-    } else if( action == ACTION_OUTPUT_OFF ) {
-    	skytraq_output_disable(fd);
-    } else if( action == ACTION_OUTPUT_NMEA ) {
-    	skytraq_output_enable_nmea(fd);    
-    } else if( action == ACTION_OUTPUT_BINARY ) {
-       	skytraq_output_enable_binary(fd);
     }
     free(info);
     close(fd);
