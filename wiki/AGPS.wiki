@@ -1,0 +1,10 @@
+I am working on AGPS download support for the Skytraq datalogger program. 
+Up-to-date satellite data speeds up the start-up of the device dramatically. 
+There is a Windows program "SkyTraq_PC_agps1.0.10.exe" that can be used to 
+transfer AGPS data to the datalogger. However, a pure Linux solution would of 
+cause be nicer.
+
+The code for downloading the AGPS data and transmitting it to the device is 
+almost complete. Unfortunately the datalogger terminates the transmission 
+after the second data block has been sent. I ran out of ideas what could be 
+wrong.
