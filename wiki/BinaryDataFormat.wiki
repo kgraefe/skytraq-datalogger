@@ -2,7 +2,7 @@ There are two kind of entries, a long 18 byte entry and a short 8 byte entry. AN
   * speed (km/h) 8 bit
   * number of week (GPS time) 12 bit
   * time of week (GPS time) 20 bit
-  * ECEF x-axis 24 bit
+  * [http://en.wikipedia.org/wiki/ECEF ECEF] x-axis 24 bit
   * ECEF y-axis 24 bit
   * ECEF z-axis 24 bit
 
