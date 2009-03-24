@@ -3,7 +3,7 @@ These devices have been reported to work with the program:
 
 The datalogger I own does not have a real name, it looks like this:
 
-http://skytraq-datalogger.googlecode.com/svn/trunk/doc/datalogger_jze.jpg
+http://skytraq-datalogger.googlecode.com/svn/wiki/datalogger_jze.jpg
 
 It should also work with other devices using the Skytraq Venus 5 or Skytraq Vensu 6 chipset like: 
   * [http://www.sja.com.tw/prog/pro5286A3S.htm SJ-5286A3S]
