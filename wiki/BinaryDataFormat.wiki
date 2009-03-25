@@ -6,9 +6,13 @@ There are two kind of entries, a long 18 byte entry and a short 8 byte entry. AN
   * ECEF y-axis 24 bit
   * ECEF z-axis 24 bit
 
+http://skytraq-datalogger.googlecode.com/svn/wiki/binary_protocol_long.png
+
 A short entry contains the speed and differences to its preceding entry (short or long): 
   * speed (km/h) 8 bit
   * time difference 16 bit
   * ECEF x-axis difference
   * ECEF y-axis difference
   * ECEF z-axis difference
+
+http://skytraq-datalogger.googlecode.com/svn/wiki/binary_protocol_short.png
