@@ -8,3 +8,27 @@ The code for downloading the AGPS data and transmitting it to the device is
 almost complete. Unfortunately the datalogger terminates the transmission 
 after the second data block has been sent. I ran out of ideas what could be 
 wrong.
+
+This happens when I send the block size to 128 bytes:
+{{{
+$ ./text
+opened device with 9600 bit/s
+sending data...
+got ACK
+BINSIZE = 114638 Checksum = 216 Checksumb = 215
+waiting for OK
+read_string
+response from GPS device: OK
+data left: 114638
+sending 128 bytes from position 0x80600f8
+read_string
+response from GPS device: OK
+data left: 114510
+sending 128 bytes from position 0x8060178
+read_string
+response from GPS device: Error2
+}}}
+
+The traces from the uploads with the Windows and the "test" program from skytraq-datalogger can be found here:
+  * http://skytraq-datalogger.googlecode.com/svn/wiki/agps_upload_linux
+  * http://skytraq-datalogger.googlecode.com/svn/wiki/agps_upload_windows.gz
