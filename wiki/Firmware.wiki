@@ -1,4 +1,4 @@
-#information on different firmware versions
+#summary information on different firmware versions
 
 jzedlitz's device:
   * kernel version: 1.2.16 
