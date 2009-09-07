@@ -5,30 +5,33 @@ transfer AGPS data to the datalogger. However, a pure Linux solution would of
 cause be nicer.
 
 The code for downloading the AGPS data and transmitting it to the device is 
-almost complete. Unfortunately the datalogger terminates the transmission 
-after the second data block has been sent. I ran out of ideas what could be 
-wrong.
+almost complete. Ephemeris data is sent in block of 8192 bytes. The GPS device answers with "OK" after the transmission of each block. So far so good -- unfortunately the program runs into a timeout after sending the last block (that is typically smaller than 8192 bytes). However the Windows programs also seems to transmit no padding after the last block.
 
-This happens when I send the block size to 128 bytes:
+If you want to help with the development you can generate a test program by invoking
 {{{
-$ ./text
-opened device with 9600 bit/s
-sending data...
-got ACK
-BINSIZE = 114638 Checksum = 216 Checksumb = 215
-waiting for OK
-read_string
-response from GPS device: OK
-data left: 114638
-sending 128 bytes from position 0x80600f8
-read_string
-response from GPS device: OK
-data left: 114510
-sending 128 bytes from position 0x8060178
-read_string
-response from GPS device: Error2
+make test
 }}}
 
-The traces from the uploads with the Windows and the "test" program from skytraq-datalogger can be found here:
-  * http://skytraq-datalogger.googlecode.com/svn/wiki/agps_upload_linux
-  * http://skytraq-datalogger.googlecode.com/svn/wiki/agps_upload_windows.gz
+The "test" program runs without further options and expects the GPS device to be attached to /dev/ttyUSB0.
+
+This is the (abbreviated) output from the test program:
+{{{
+$ ./text
+TEST: opened device with 115200 bit/s
+TEST: sending data...
+skytraq_send_agps_data: got ACK
+skytraq_send_agps_data: BINSIZE = 110940 Checksum = 149 Checksumb = 18 
+skytraq_send_agps_data: waiting for OK
+skytraq_send_agps_data: data left: 110940
+write_large_buffer:  length: 8192 byte
+skytraq_read_ok: response from GPS device: OK
+skytraq_send_agps_data: data left: 102748
+...
+skytraq_send_agps_data: data left: 12636
+write_large_buffer:  length: 8192 byte
+skytraq_read_ok: response from GPS device: OK
+skytraq_send_agps_data: sending last 4444 bytes
+write_large_buffer:  length: 4444 byte
+read_string: BEGIN
+read_string: timeout
+}}}
