@@ -8,3 +8,4 @@ http://skytraq-datalogger.googlecode.com/svn/wiki/datalogger_jze.jpg
 It should also work with other devices using the Skytraq Venus 5 or Skytraq Vensu 6 chipset like: 
   * [http://www.sja.com.tw/prog/pro5286A3S.htm SJ-5286A3S]
   * Navilock BT-455PDL
+  * [http://www.canmore.com.tw/productshow.php?product_number=16 Canmore GT-750F/L-Lite]
