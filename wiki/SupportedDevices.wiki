@@ -1,5 +1,10 @@
 These devices have been reported to work with the program: 
   * Canmore GT-730F(L)
+  * [http://www.canmore.com.tw/product.aspx?id=38 Canmore GT-750F]
+  * [http://www.adapt-mobile.com/mobile/detail.php?p_id=481 Adapt Keychain Pro Gps Receiver]
+  * [http://polaris-gps.com/5.html Polaris Travel Honey]
+  * [http://www.pearl.fr/gps-pda/gps/appareils/mini-recepteur-gps-et-data-logger-bluetooth-keymate-stv-5_PX1051.html NavGear Key STV-5 from Pearl-Diffusion ]
+  * [http://www.canmore.com.tw/productshow.php?product_number=16 Canmore GT-750F/L-Lite]
 
 The datalogger I own does not have a real name, it looks like this:
 
@@ -8,4 +13,3 @@ http://skytraq-datalogger.googlecode.com/svn/wiki/datalogger_jze.jpg
 It should also work with other devices using the Skytraq Venus 5 or Skytraq Vensu 6 chipset like: 
   * [http://www.sja.com.tw/prog/pro5286A3S.htm SJ-5286A3S]
   * Navilock BT-455PDL
-  * [http://www.canmore.com.tw/productshow.php?product_number=16 Canmore GT-750F/L-Lite]
