@@ -1,0 +1,64 @@
+pl2303_write - port 0, 49 bytes
+pl2303_send - port 0
+pl2303_send - length = 49, data = 42 49 4e 53 49 5a 45 20 3d 20 31 31 34 36 33 38 20 43 68 65 63 6b 73 75 6d 20 3d 20 32 31 36 20 43 68 65 63 6b 73 75 6d 62 20 3d 20 32 31 35 20 00 
+pl2303_write_bulk_callback - port 0
+pl2303_send - port 0
+pl2303_read_bulk_callback - port 0
+pl2303_read_bulk_callback - length = 1, data = 4f 
+pl2303_read_bulk_callback - tty_flag = 0
+pl2303_read_bulk_callback - port 0
+pl2303_read_bulk_callback - length = 2, data = 4b 00 
+pl2303_read_bulk_callback - tty_flag = 0
+pl2303_write - port 0, 128 bytes
+pl2303_send - port 0
+pl2303_send - length = 64, data = 1f 02 00 7e 90 04 7d 10 01 00 00 00 00 00 00 00 00 00 00 00 00 55 5e ec 00 ff fa 14 36 5c 00 7e 90 88 55 0c 73 37 5d b1 c6 52 fa 0b 02 04 a0 6d 20 13 53 a1 0d 18 b3 5e ec 00 00 7e 91 0c 00 07 
+pl2303_write_bulk_callback - port 0
+pl2303_send - port 0
+pl2303_send - length = 64, data = 1d 40 37 1e ff b1 26 60 44 5e 18 2f 70 5f 84 42 ff a3 ce 55 17 60 1f 03 00 7e 90 04 7d 10 01 00 00 00 00 00 00 00 00 00 00 00 00 55 5e ec 00 00 2f 30 99 90 00 7e 90 88 55 f9 81 39 de a3 00 7f 
+pl2303_write_bulk_callback - port 0
+pl2303_send - port 0
+pl2303_read_bulk_callback - port 0
+pl2303_read_bulk_callback - length = 1, data = 4f 
+pl2303_read_bulk_callback - tty_flag = 0
+pl2303_read_bulk_callback - port 0
+pl2303_read_bulk_callback - length = 1, data = 4b 
+pl2303_read_bulk_callback - tty_flag = 0
+pl2303_read_bulk_callback - port 0
+pl2303_read_bulk_callback - length = 1, data = 00 
+pl2303_read_bulk_callback - tty_flag = 0
+pl2303_write - port 0, 128 bytes
+pl2303_send - port 0
+pl2303_send - length = 64, data = b6 fa 82 06 01 ca 71 16 1e a1 0d fb cc 5e ec 00 00 7e 91 0c 00 89 ee 8a 24 b1 00 58 25 c0 31 c5 13 52 24 78 01 44 ff a4 9a 55 ee 48 1f 04 00 7e 90 04 7d 10 01 00 00 00 00 00 00 00 00 00 00 00 
+pl2303_write_bulk_callback - port 0
+pl2303_send - port 0
+pl2303_send - length = 64, data = 00 55 5e ec 00 ff 7f fc 71 f4 00 7e 90 88 55 0e 25 38 21 25 c0 1e cd 0c 53 04 67 0d 40 13 89 a1 0d b3 65 5e ec 00 00 7e 91 0c ff a1 1e 00 9f b1 00 26 26 58 04 8d 18 18 13 a3 83 1b ff a4 25 55 
+pl2303_write_bulk_callback - port 0
+pl2303_send - port 0
+pl2303_read_bulk_callback - port 0
+pl2303_read_bulk_callback - length = 1, data = 45 
+pl2303_read_bulk_callback - tty_flag = 0
+pl2303_read_bulk_callback - port 0
+pl2303_read_bulk_callback - length = 2, data = 72 72 
+pl2303_read_bulk_callback - tty_flag = 0
+pl2303_read_bulk_callback - port 0
+pl2303_read_bulk_callback - length = 1, data = 6f 
+pl2303_read_bulk_callback - tty_flag = 0
+pl2303_read_bulk_callback - port 0
+pl2303_read_bulk_callback - length = 1, data = 72 
+pl2303_read_bulk_callback - tty_flag = 0
+pl2303_read_bulk_callback - port 0
+pl2303_read_bulk_callback - length = 1, data = 32 
+pl2303_read_bulk_callback - tty_flag = 0
+pl2303_read_bulk_callback - port 0
+pl2303_read_bulk_callback - length = 1, data = 00 
+pl2303_read_bulk_callback - tty_flag = 0
+pl2303_read_bulk_callback - port 0
+pl2303_read_bulk_callback - length = 1, data = 45 
+pl2303_read_bulk_callback - tty_flag = 0
+pl2303_close - port 0
+pl2303_read_bulk_callback - port 0
+pl2303_read_bulk_callback - length = 1, data = 72 
+pl2303_read_bulk_callback - tty_flag = 0
+pl2303_close - shutting down urbs
+pl2303_read_int_callback (0)
+pl2303_read_int_callback - urb shutting down with status: -2

@@ -1,0 +1,3 @@
+At the time of writing this I found several documents with the specification online:
+  * [Application Note AN0003 - Binary Messages Of SkyTraq Venus 5 GPS Receiver](http://www.mr-lee-catcam.de/BINARY/skytraq_AN0003_v3_binary_message.pdf) - this describes how to configure the GPS receiver itself
+  * [Application Note AN0008 - Data Logging Extension For Venus 5 GPS Receiver](http://www.nabble.com/attachment/17855164/1/AN0008_v048_%20datalog%20extesion.pdf) - configuration and download of tracks from the data logger
